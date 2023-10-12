@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
+const crypto = require("crypto");
 
 // create .git folder and its subfolders. Defensively set { recursive: true } in case we refactor
 function gitInit() {
@@ -38,14 +39,15 @@ function printBlob(blobSHA) {
 
 // takes in a file name or path, hashes and adds it to /objects, then prints the SHA-1 hash
 function hashFile(fileNameOrPath) {
-  console.log(`hash file called on: ${fileNameOrPath}`);
-  const fileContent = fs.readFileSync(path.join(__dirname, fileNameOrPath));
-  console.log(
-    `file content: ${fileContent}, and its type: ${typeof fileContent}`
-  );
+  // console.log(`hash file called on: ${fileNameOrPath}`);
+  const fileContent = fs.readFileSync(path.join(__dirname, fileNameOrPath)); // buffer object
   const fileContentString = fileContent.toString();
-  console.log(`file content string: ${fileContentString}`);
-  // const fileHash = hashObject(fileContentString);
+  // console.log(`file content string: ${fileContentString}`);
+  const hash = crypto.createHash("sha1");
+  hash.update(fileContentString);
+  const sha1 = hash.digest("hex");
+  // console.log(`sha1: ${sha1}`);
+  process.stdout.write(sha1); // pass test
 }
 
 // sources from terminal
