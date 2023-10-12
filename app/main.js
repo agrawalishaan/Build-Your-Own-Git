@@ -64,7 +64,7 @@ switch (gitCommand) {
     }
     break;
   case "hash-object":
-    flag = process.argv[3]; // -w means write to database
+    const flag = process.argv[3]; // -w means write to database
     if (flag === "-w") {
       const fileNameOrPath = process.argv[4];
       hashFile(fileNameOrPath);
