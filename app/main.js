@@ -2,9 +2,6 @@ const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
 
-// sources from terminal
-const gitCommand = process.argv[2];
-
 // create .git folder and its subfolders. Defensively set { recursive: true } in case we refactor
 function gitInit() {
   console.log(`git init command received`);
@@ -49,28 +46,28 @@ function hashFile(fileNameOrPath) {
   // const fileHash = hashObject(fileContentString);
 }
 
-switch (gitCommand) {
-  case "init":
-    gitInit();
-    break;
-  case "cat-file":
-    const flag = process.argv[3];
-    const blobSHA = process.argv[4];
-    if (flag === "-p") {
-      // pretty print
-      printBlob(blobSHA);
-    } else {
-      throw new Error(`Unknown flag ${flag}`);
-    }
-    break;
-  case "hash-object":
-    const flag = process.argv[3]; // -w means write to database
-    if (flag === "-w") {
-      const fileNameOrPath = process.argv[4];
-      hashFile(fileNameOrPath);
-    } else {
-      throw new Error(`Unknown flag ${flag}`);
-    }
-  default:
-    throw new Error(`Unknown command ${command}`);
+// sources from terminal
+const gitCommand = process.argv[2];
+
+if (gitCommand === "init") {
+  gitInit();
+} else if (gitCommand === "cat-file") {
+  const flag = process.argv[3];
+  const blobSHA = process.argv[4];
+  if (flag === "-p") {
+    // pretty print
+    printBlob(blobSHA);
+  } else {
+    throw new Error(`Unknown flag ${flag}`);
+  }
+} else if (gitCommand === "hash-object") {
+  const flag = process.argv[3]; // -w means write to database
+  if (flag === "-w") {
+    const fileNameOrPath = process.argv[4];
+    hashFile(fileNameOrPath);
+  } else {
+    throw new Error(`Unknown flag ${flag}`);
+  }
+} else {
+  throw new Error(`Unknown command ${command}`);
 }
