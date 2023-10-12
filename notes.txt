@@ -1,0 +1,3 @@
+when a shell script is called, for instance:
+./your_git.sh cat-file -p <blob_sha>
+Based on the contents in your_git.sh, the commands (cat-file, -p, <blob_sha>) are all passed to main.js. These are then parsed by the process.argv and the appropriate git function runs.
