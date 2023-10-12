@@ -1,11 +1,13 @@
 const fs = require("fs");
 const path = require("path");
+const zlib = require("zlib");
 
 // sources from terminal
 const gitCommand = process.argv[2];
 
 // create .git folder and its subfolders. Defensively set { recursive: true } in case we refactor
 function gitInit() {
+  console.log(`git init command received`);
   fs.mkdirSync(path.join(__dirname, ".git"), { recursive: true });
   fs.mkdirSync(path.join(__dirname, ".git", "objects"), { recursive: true });
   fs.mkdirSync(path.join(__dirname, ".git", "refs"), { recursive: true });
@@ -18,6 +20,7 @@ function gitInit() {
 }
 
 function printBlob(blobSHA) {
+  console.log(`trying to read blob file from SHA: ${blobSHA}`);
   const blobPath = path.join(
     __dirname,
     ".git",
@@ -25,8 +28,14 @@ function printBlob(blobSHA) {
     blobSHA.slice(0, 2),
     blobSHA.slice(2)
   );
+  console.log(`the blob path: ${blobPath}`);
   const blob = fs.readFileSync(blobPath);
-  console.log(blob);
+  console.log(`the blob: ${blob}`);
+  // decompress the blob
+  const decompressedBlob = zlib.inflateSync(blob).toString();
+  console.log(`the decompressed blob: ${decompressedBlob}`);
+  // print the blob
+  console.log(decompressedBlob);
 }
 
 switch (gitCommand) {
