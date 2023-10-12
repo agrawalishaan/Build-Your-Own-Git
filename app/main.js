@@ -39,6 +39,16 @@ function printBlob(blobSHA) {
   process.stdout.write(content); // pass the test, doesn't write a new line at the end unlike console.log
 }
 
+// takes in a file name or path, hashes and adds it to /objects, then prints the SHA-1 hash
+function hashFile(fileNameOrPath) {
+  console.log(`hash file called on: ${fileNameOrPath}`);
+  const fileContent = fs.readFileSync(path.join(__dirname, fileNameOrPath));
+  console.log(`file content: ${fileContent}`);
+  const fileContentString = fileContent.toString();
+  console.log(`file content string: ${fileContentString}`);
+  // const fileHash = hashObject(fileContentString);
+}
+
 switch (gitCommand) {
   case "init":
     gitInit();
@@ -53,6 +63,14 @@ switch (gitCommand) {
       throw new Error(`Unknown flag ${flag}`);
     }
     break;
+  case "hash-object":
+    flag = process.argv[3]; // -w means write to database
+    if (flag === "-w") {
+      const fileNameOrPath = process.argv[4];
+      hashFile(fileNameOrPath);
+    } else {
+      throw new Error(`Unknown flag ${flag}`);
+    }
   default:
     throw new Error(`Unknown command ${command}`);
 }
