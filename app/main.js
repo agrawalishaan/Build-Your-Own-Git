@@ -40,7 +40,9 @@ function printBlob(blobSHA) {
 function hashFile(fileNameOrPath) {
   console.log(`hash file called on: ${fileNameOrPath}`);
   const fileContent = fs.readFileSync(path.join(__dirname, fileNameOrPath));
-  console.log(`file content: ${fileContent}`);
+  console.log(
+    `file content: ${fileContent}, and its type: ${typeof fileContent}`
+  );
   const fileContentString = fileContent.toString();
   console.log(`file content string: ${fileContentString}`);
   // const fileHash = hashObject(fileContentString);
