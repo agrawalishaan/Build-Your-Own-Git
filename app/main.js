@@ -34,7 +34,7 @@ function printBlob(blobSHA) {
   // decompress the blob
   const decompressedBlob = zlib.inflateSync(blob).toString();
   console.log(`the decompressed blob: ${decompressedBlob}`);
-  const content = decompressedBlob.split("\x00"); // not sure where this occurs from, though x00 represents the null byte
+  const content = decompressedBlob.split("\x00")[1]; // not sure where this occurs from, though x00 represents the null byte
   console.log(`the content is: ${content}`);
   process.stdout.write(content); // pass the test
 }
