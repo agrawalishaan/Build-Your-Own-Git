@@ -20,7 +20,7 @@ function gitInit() {
 }
 
 function printBlob(blobSHA) {
-  console.log(`trying to read blob file from SHA: ${blobSHA}`);
+  // console.log(`trying to read blob file from SHA: ${blobSHA}`);
   const blobPath = path.join(
     __dirname,
     ".git",
@@ -28,15 +28,15 @@ function printBlob(blobSHA) {
     blobSHA.slice(0, 2),
     blobSHA.slice(2)
   );
-  console.log(`the blob path: ${blobPath}`);
+  // console.log(`the blob path: ${blobPath}`);
   const blob = fs.readFileSync(blobPath);
-  console.log(`the blob: ${blob}`);
+  // console.log(`the blob: ${blob}`);
   // decompress the blob
   const decompressedBlob = zlib.inflateSync(blob).toString();
-  console.log(`the decompressed blob: ${decompressedBlob}`);
+  // console.log(`the decompressed blob: ${decompressedBlob}`);
   const content = decompressedBlob.split("\x00")[1]; // not sure where this occurs from, though x00 represents the null byte
-  console.log(`the content is: ${content}`);
-  process.stdout.write(content); // pass the test
+  // console.log(`the content is: ${content}`);
+  process.stdout.write(content); // pass the test, doesn't write a new line at the end unlike console.log
 }
 
 switch (gitCommand) {
