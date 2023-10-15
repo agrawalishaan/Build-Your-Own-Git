@@ -106,25 +106,23 @@ function parseTreeObject(data) {
 // [mode] [file/folder name]\0[SHA-1 of referencing blob or tree]
 function parseTree(buffer) {
   const entries = [];
-
   let i = buffer.indexOf(0) + 1; // searching for the first null byte (00000000), marks the end of the header
 
   while (i < buffer.length) {
     const nextSpaceIndex = buffer.indexOf(32, i); // find the next space, 32=ASCII for space
     const nextNullByteIndex = buffer.indexOf(0, nextSpaceIndex);
-    const mode = buffer.slice(i, spaceIndex).toString();
-    const path = buffer.slice(spaceIndex + 1, nextNullByteIndex).toString();
+    const mode = buffer.slice(i, nextSpaceIndex).toString();
+    const path = buffer.slice(nextSpaceIndex + 1, nextNullByteIndex).toString();
 
     // SHA-1 is the 20 bytes following the null byte
-    const sha1 = buffer.slice(nullIndex + 1, nullIndex + 21);
+    const sha1 = buffer.slice(nextNullByteIndex + 1, nextNullByteIndex + 21);
     const sha1Hex = sha1.toString("hex");
 
     entries.push({ mode, path, sha1: sha1Hex });
 
     // move to the next entry
-    i = nullIndex + 21;
+    i = nextNullByteIndex + 21;
   }
-
   return entries;
 }
 
