@@ -2,10 +2,15 @@ const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
 const crypto = require("crypto");
+// const print = require("./util/print");
+
+function print(content) {
+  process.stdout.write(content + "\n");
+}
 
 // create .git folder and its subfolders. Defensively set { recursive: true } in case we refactor
 function gitInit() {
-  console.log(`git init command received`);
+  print("initializing...");
   fs.mkdirSync(path.join(__dirname, ".git"), { recursive: true });
   fs.mkdirSync(path.join(__dirname, ".git", "objects"), { recursive: true });
   fs.mkdirSync(path.join(__dirname, ".git", "refs"), { recursive: true });
@@ -14,11 +19,10 @@ function gitInit() {
     path.join(__dirname, ".git", "HEAD"),
     "ref: refs/heads/master\n"
   );
-  console.log("git repository initialized");
+  print("git repo initialized");
 }
 
 function printBlob(blobSHA) {
-  // console.log(`trying to read blob file from SHA: ${blobSHA}`);
   const blobPath = path.join(
     __dirname,
     ".git",
@@ -26,28 +30,37 @@ function printBlob(blobSHA) {
     blobSHA.slice(0, 2),
     blobSHA.slice(2)
   );
-  // console.log(`the blob path: ${blobPath}`);
   const blob = fs.readFileSync(blobPath);
-  // console.log(`the blob: ${blob}`);
   // decompress the blob
   const decompressedBlob = zlib.inflateSync(blob).toString();
-  // console.log(`the decompressed blob: ${decompressedBlob}`);
   const content = decompressedBlob.split("\x00")[1]; // not sure where this occurs from, though x00 represents the null byte
-  // console.log(`the content is: ${content}`);
   process.stdout.write(content); // pass the test, doesn't write a new line at the end unlike console.log
 }
 
-// takes in a file name or path, hashes and adds it to /objects, then prints the SHA-1 hash
-function hashFile(fileNameOrPath) {
-  // console.log(`hash file called on: ${fileNameOrPath}`);
-  const fileContent = fs.readFileSync(path.join(__dirname, fileNameOrPath)); // buffer object
-  const fileContentString = fileContent.toString();
-  // console.log(`file content string: ${fileContentString}`);
+//  hashes and adds it to /objects, and prints the SHA-1 hash
+function writeObject(filePath) {
+  print(`hashing... ${filePath}`);
+
+  // read the file content and construct the biniary data
+  const fileBuffer = fs.readFileSync(path.join(__dirname, filePath));
+  const header = `blob ${fileBuffer.length}\0`; // prefix the file content with the header, unique identifoer for each object type + size of the file content + null byte
+  const storeData = Buffer.from(header + fileBuffer.toString()); // we hash on binary data, so we convert back to a buffer
+  print(`file content string: ${storeData}`);
+
+  // hash the data
   const hash = crypto.createHash("sha1");
-  hash.update(fileContentString);
+  hash.update(storeData);
   const sha1 = hash.digest("hex");
-  // console.log(`sha1: ${sha1}`);
+  print(`sha1: ${sha1}`);
   process.stdout.write(sha1); // pass test
+
+  // write the data to /objects
+  folder = sha1.slice(0, 2);
+  fileName = sha1.slice(2);
+  const objectDir = path.join(__dirname, ".git", "objects", folder);
+  const objectPath = path.join(objectDir, fileName);
+  fs.mkdirSync(objectDir, { recursive: true }); // ensure the directory exists before writing the file
+  fs.writeFileSync(objectPath, zlib.deflateSync(storeData)); // git stores compressed data
 }
 
 // sources from terminal
@@ -58,8 +71,8 @@ if (gitCommand === "init") {
 } else if (gitCommand === "cat-file") {
   const flag = process.argv[3];
   const blobSHA = process.argv[4];
+  // pretty print
   if (flag === "-p") {
-    // pretty print
     printBlob(blobSHA);
   } else {
     throw new Error(`Unknown flag ${flag}`);
@@ -67,8 +80,8 @@ if (gitCommand === "init") {
 } else if (gitCommand === "hash-object") {
   const flag = process.argv[3]; // -w means write to database
   if (flag === "-w") {
-    const fileNameOrPath = process.argv[4];
-    hashFile(fileNameOrPath);
+    const filePath = process.argv[4];
+    writeObject(filePath);
   } else {
     throw new Error(`Unknown flag ${flag}`);
   }
